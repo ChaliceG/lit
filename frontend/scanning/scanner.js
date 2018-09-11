@@ -1,12 +1,14 @@
 const Tokens = require('./tokens');
 const tokenRadix = Tokens.radix;
 const ignoreTokens = Tokens.ignoreTokens;
+const numberRegex = /^[0-9]+(\.[0-9]*)?$/g;
+const identifierRegex = /^[a-zA-Z_]+$/g;
 
 function scan (input) {
 	var tokens = [], index = 0, token, newLines = 0;
 	while(index < input.length) {
 		token = chunk(index, input);
-		if (token.type === 'NEWLINE') newLines++;
+		if (token.type === 'NEWLINE' || token.type === 'COMMENT') newLines++;
 		if (token.type === 'STRING') newLines += countNewLines(token.value);
 		token.line = newLines + 1;
 		tokens.push(token);
@@ -26,10 +28,6 @@ function countNewLines (str) {
 
 	return count;
 }
-
-const numberRegex = /^[0-9]+(\.[0-9]*)?$/g;
-const identifierRegex = /^[a-zA-Z_]+$/g;
-const commentRegex = /\/\/.*\/n/gm;
 
 //given a string, say 
 // A: if its valid
@@ -51,15 +49,16 @@ function radixHas (input) {
 		return 'more';
 	}
 
-	if (input[0] === '/' && input[1] === '*') {
-		if (input[input.length - 2] === '*' && input[input.length - 1] === '/') {
+	if (input[0] === '/' && input[1] === '/') {
+		if (input[input.length - 1] === '\n'
+			|| input[input.length - 1] === '\0') {
 			return {
 				value: '',
 				type: 'COMMENT',
 				valid: true,
 				stop: true,
 				length: input.length
-			};
+			}
 		}
 		return 'more';
 	}
@@ -101,8 +100,8 @@ function chunk (start, input) {
 		valid: false,
 		length: 1
 	};
-	while(start < input.length) {
-		has = radixHas(str);
+	while(start <= input.length) {
+		has = radixHas(start == input.length ? str + '\0' : str);
 		if (has === false) {
 			return ret;
 		}

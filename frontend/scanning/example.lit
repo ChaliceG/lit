@@ -3,5 +3,6 @@ val x: {
 }
 
 while (x is positive) {{
-	x: x - 1;
+	x: x - 1.8;
 }}
+//a comment

@@ -30,6 +30,7 @@ const TokenTypes = {
 	SPACE: sequence(' '),
 	TAB: sequence('	'),
 	NEWLINE: sequence('\n'),
+	END: sequence('\0'),
 
 	//keywords
 	WHILE: sequence('while'),
@@ -39,7 +40,6 @@ const TokenTypes = {
 
 function sequence (string) {
 	return {
-		value: string,
 		sequence: string.split('')
 	};
 }
