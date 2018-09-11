@@ -4,5 +4,7 @@ val x: {
 
 while (x is positive) {{
 	x: x - 1.8;
+	y: "foo
+  \"bar"
 }}
 //a comment

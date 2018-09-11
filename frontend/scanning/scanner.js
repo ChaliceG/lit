@@ -37,9 +37,13 @@ function countNewLines (str) {
 //no more	object		false
 function radixHas (input) {
 	if (input[0] === '"') {
-		if (input.length > 1 && input[input.length - 1] === '"') {
+		if (input.length > 1
+			&& input[input.length - 1] === '"'
+			&& input[input.length - 2] !== '\\') {
 			return {
-				value: input.substr(1, input.length - 2),
+				value: input
+					.substr(1, input.length - 2)
+					.replace('\\"', '"'),
 				valid: true,
 				type: 'STRING',
 				stop: true,
