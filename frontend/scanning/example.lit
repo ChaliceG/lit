@@ -1,0 +1,7 @@
+val x: {
+	foo: "bar"
+}
+
+while (x is positive) {{
+	x: x - 1;
+}}
