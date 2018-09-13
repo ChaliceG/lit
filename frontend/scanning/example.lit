@@ -1,10 +1,9 @@
 val x: {
 	foo: "bar"
 }
-
+x: 20;
 while (x is positive) {{
-	x: x - 1.8;
-	y: "foo
-  \"bar"
+	x: x - 1;
+	y: "foobar"
 }}
 //a comment

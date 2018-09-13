@@ -18,6 +18,8 @@ const TokenTypes = {
 	GREATER: sequence('>'),
 	LESS: sequence('<'),
 	PIPE: sequence('|'),
+	OR: sequence('||'),
+	AND: sequence('&&'),
 	GREATER_EQUAL: sequence('>='),
 	LESS_EQUAL: sequence('<='),
 	BANG_EQUAL: sequence('!='),

@@ -14,16 +14,21 @@ function scan (input) {
 		tokens.push(token);
 		index += token.length;
 	}
-	return tokens.filter(token => !ignoreTokens[token.type]);
+	tokens = tokens.filter(token => !ignoreTokens[token.type]);
+	tokens.push({
+		type: 'END',
+		line: newLines + 1,
+		valid: true
+	});
+	return tokens;
 }
 
-function countNewLines (str) {
+function countNewLines (string) {
 	var count = 0;
-	var pos = str.indexOf('\n');
-
+	var pos = string.indexOf('\n');
 	while (pos !== -1) {
 	  count++;
-	  pos = str.indexOf('\n', pos + 1);
+	  pos = string.indexOf('\n', pos + 1);
 	}
 
 	return count;
