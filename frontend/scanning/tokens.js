@@ -74,6 +74,7 @@ module.exports = {
 		'SPACE': true,
 		'TAB': true,
 		'NEWLINE': true,
-		'COMMENT': true
+		'COMMENT': true,
+		'COMMA': true
 	}
 };

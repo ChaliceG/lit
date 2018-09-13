@@ -7,7 +7,7 @@ const reader = require('readline').createInterface({
 });
 
 function error (token, message) {
-	const tokenValue = token === 0
+	const tokenValue = token.type === 'END'
 		? 'end of file'
 		: token.value
 	console.log(`[line ${token.line}] Error: ${message} at ${tokenValue}.`);
@@ -43,7 +43,7 @@ function parseTokens (tokens) {
 		return false;
 	} catch (e) {
 		if (e.token !== undefined) {
-			error(e.token.line, e.msg);
+			error(e.token, e.msg);
 		} else {
 			throw e;
 		}
