@@ -36,6 +36,8 @@ const TokenTypes = {
 
 	//keywords
 	WHILE: sequence('while'),
+	WHERE: sequence('where'),
+	SHAPE: sequence('shape'),
 	VAL: sequence('val'),
 	IS: sequence('is')
 }
