@@ -1,6 +1,7 @@
 const scanner = require('./frontend/scanning/scanner');
 const parser = require('./frontend/parsing/parser');
 
+
 const reader = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
