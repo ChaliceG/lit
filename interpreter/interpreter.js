@@ -1,5 +1,5 @@
 module.exports = function (ast) {
-  //console.log(JSON.stringify(ast, null , 2));
+  // console.log(JSON.stringify(ast, null , 2));
   E(ast);
 }
 
@@ -24,6 +24,8 @@ function E (node) {
       return E(L) * E(R);
     case 'SLASH':
       return E(L) / E(R);
+    case 'MOD':
+      return E(L) % E(R);
 
     //logic
     case 'OR':
@@ -48,11 +50,13 @@ function E (node) {
       return equal(E(L), E(R));
     case 'BANG':
       return !E(L);
+
+    //statements
     case 'PROGRAM':
       executeStatements(node.children.slice(1));
       break;
     case 'PRINT':
-      console.log(E(L));
+      console.log(JSON.stringify(E(L), null ,2));
       break;
     case 'VALUE_DEFINITION':
       variables[L.value] = E(R);
@@ -61,7 +65,49 @@ function E (node) {
     case 'WHILE_EXPRESSION':
       whileStmt(node.children.slice(1));
       break;
+
+    //ADTs
+    case 'MAP':
+      return buildMap(node.children.slice(1));
+    case 'LIST':
+      return (node.children.slice(1) || []).map(E);
+
+    case 'REFERENCE':
+      return reference(node.children.slice(1));
   }
+}
+
+function reference (path) {
+  var base = E(path[0]);
+  for(var i = 1; i < path.length; i++) {
+    base = dereference(base, path[i]);
+  }
+  return base;
+}
+
+function dereference (base, prop) {
+  if (prop.children[0].type === 'MAP_GET') {
+    return base[E(prop.children[1])];
+  }
+  return base[prop.children[1].value];
+}
+
+function buildMap (kvps) {
+  const map = {};
+  (kvps || [])
+    .map(evaluateKvp)
+    .forEach(kvp => {
+      map[kvp.key] = kvp.value;
+    });
+  return map;
+}
+
+function evaluateKvp (kvp) {
+  const x = {
+    key: kvp.children[0].children[0].value,
+    value: E(kvp.children[1])
+  }
+  return x;
 }
 
 function whileStmt (statements) {
@@ -92,6 +138,8 @@ function terminal (node) {
       return node.value;
     case 'IDENTIFIER':
       return getValue(node.value);
+    case 'NULL':
+      return null;
     default:
       return node
   }

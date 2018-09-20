@@ -1,20 +1,17 @@
 val index: 0
-val limit: 10 * 10
+val limit: 10
 val innerWhiles: true
 
 while (index < limit) {{
   val innerWhiles: true
-  print index / 2
-  while (index / 2 = 0 && innerWhiles) {{
-    print "FIZZ"
-    val innerWhiles: false
-  }}
-
-  while (index / 2 = 1 && innerWhiles) {{
+  while (index % 3 = 0 && innerWhiles) {{
     print "BUZZ"
     val innerWhiles: false
   }}
 
-  print "inside"
+  while ((index % 3 = 1 || index % 3 = 2) && innerWhiles) {{
+    print "FIZZ"
+    val innerWhiles: false
+  }}
   val index: index + 1
 }}

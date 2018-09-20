@@ -15,6 +15,7 @@ const TokenTypes = {
 	COLON: sequence(':'),
 	BANG: sequence('!'),
 	EQUAL: sequence('='),
+	MOD: sequence('%'),
 	GREATER: sequence('>'),
 	LESS: sequence('<'),
 	PIPE: sequence('|'),

@@ -19,7 +19,7 @@ const grammar = {
 	equality: binary('comparison', ['EQUAL', 'BANG_EQUAL']),
 	comparison: binary('addition', ['LESS', 'GREATER', 'LESS_EQUAL', 'GREATER_EQUAL']),
 	addition: binary('multiplication', ['PLUS', 'MINUS']),
-	multiplication: binary('unary', ['STAR', 'SLASH']),
+	multiplication: binary('unary', ['STAR', 'SLASH', 'MOD']),
 	unary: (shapeContext) => match('BANG', 'MINUS')
 		? AST(previous(), grammar.unary(shapeContext))
 		: grammar.reference(shapeContext),
@@ -122,43 +122,52 @@ function reference (shapeContext) {
 	var first = grammar.primary(shapeContext), referenceList = [first], prop;
 	while(match('DOUBLE_LEFT_BRACKET', 'PERIOD', 'LEFT_PAREN')) {
 		if (previous().type === 'LEFT_PAREN') {
-			if (shapeContext) {
-				throw error(previous(), 'function calls are not allowed when defining a shape');
-			}
-			if (peek().type !== 'RIGHT_PAREN') {
-				var arg = grammar.expression(shapeContext);
-				consume('RIGHT_PAREN', 'expected )');
-				return AST({
-					type: 'CALL',
-					value: 'call'
-				}, first, arg);
-			}
-			consume('RIGHT_PAREN', 'expected )');
-			return AST({ type: 'CALL', value: 'call' }, first);
+			referenceList.push(call(shapeContext));
 		}
 		if (previous().type === 'PERIOD') {
-			prop = AST(consume('IDENTIFIER', 'expected identifier'));
+			referenceList.push(AST({
+				type: 'PERIOD',
+				value: '.'
+			}, consume('IDENTIFIER', 'expected identifier')));
 		}
 		if (previous().type === 'DOUBLE_LEFT_BRACKET') {
-			prop = grammar.expression(shapeContext);
+			referenceList.push(AST({
+				type: 'MAP_GET',
+				value: 'get'
+			}, grammar.expression(shapeContext)));
 			consume('DOUBLE_RIGHT_BRACKET', 'expected ]]');
 		}
-		referenceList.push(prop);
 	}
 	if (referenceList.length === 1) return first;
 	return AST({
-		type: 'PERIOD',
-		value: '.'
+		type: 'REFERENCE',
+		value: 'ref'
 	}, ...referenceList);
+}
+
+function call (shapeContext) {
+	if (shapeContext) {
+		throw error(previous(), 'function calls are not allowed when defining a shape');
+	}
+	if (peek().type !== 'RIGHT_PAREN') {
+		var arg = grammar.expression(shapeContext);
+		consume('RIGHT_PAREN', 'expected )');
+		return AST({
+			type: 'CALL',
+			value: 'call'
+		}, first, arg);
+	}
+	consume('RIGHT_PAREN', 'expected )');
+	return AST({ type: 'CALL', value: 'call' }, first);
 }
 
 function map (shapeContext) {
 	var pairs = [], key, colon, value;
 	while(match('STRING', 'IDENTIFIER')) {
 		key = AST(previous());
-		colon = consume('COLON', 'expected :');
+		consume('COLON', 'expected :');
 		value = grammar.expression(shapeContext);
-		pairs.push(AST(key, colon, value));
+		pairs.push(AST(key, value));
 	}
 	return AST({
 		type: 'MAP',

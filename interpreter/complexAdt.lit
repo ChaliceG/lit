@@ -1,0 +1,9 @@
+val x: {
+  a: [1 , 2, 3]
+  nested: {
+    m: "p"
+    q: null
+  }
+}
+
+print x
