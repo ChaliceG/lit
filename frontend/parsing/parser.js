@@ -7,10 +7,13 @@ const grammar = {
 	statement: statement,
 	valueDef: valueDef,
 	shapeDef: shapeDef,
+	whileStmt: whileStmt,
+	block: block,
+	print: print,
 	predicate: predicate,
 	map: map,
 	list: list,
-	expression: (shapeContext) => grammar.equality(shapeContext),
+	expression: (shapeContext) => grammar.logicOr(shapeContext),
 	logicOr: binary('logicAnd', ['OR']),
 	logicAnd: binary('equality', ['AND']),
 	equality: binary('comparison', ['EQUAL', 'BANG_EQUAL']),
@@ -25,11 +28,50 @@ const grammar = {
 	value: value
 };
 
+function print () {
+	return AST({
+		type: 'PRINT',
+		value: 'print'
+	}, grammar.expression());
+}
+
 function statement () {
 	if (match('VAL')) return grammar.valueDef();
 	if (match('SHAPE')) return grammar.shapeDef();
 	if (match('WHILE')) return grammar.whileStmt();
+	if (match('PRINT')) return grammar.print();
 	return grammar.expression();
+}
+
+function whileStmt () {
+	if (peek().type === 'LEFT_PAREN') {
+		consume('LEFT_PAREN', 'expected (');
+		var test = grammar.expression();
+		consume('RIGHT_PAREN', 'expected )');
+		return AST({
+			type: 'WHILE_EXPRESSION',
+			value: 'while'
+		}, test, ...grammar.block());
+	} else {
+		var subject = consume('IDENTIFIER', 'expected identifier');
+		consume('IS', 'expected is');
+		var shape = consume('IDENTIFIER', 'expected shape');
+		return AST({
+			type: 'WHILE_SHAPE',
+			value: 'while'
+		}, subject, shape, ...grammar.block());
+	}
+}
+
+function block () {
+	consume('DOUBLE_LEFT_BRACE', 'expected {{');
+	const statements = [];
+	while (peek().type !== 'DOUBLE_RIGHT_BRACE'
+		&& peek().type !== 'END') {
+		statements.push(grammar.statement());
+	}
+	advance();
+	return statements;
 }
 
 function valueDef () {
@@ -160,16 +202,23 @@ function primary (shapeContext) {
 	if (match('IDENTIFIER')) {
 		return AST(previous());
 	}
-	if (match('LEFT_BRACE', 'LEFT_BRACKET', 'NUMBER', 'STRING', 'NULL')) {
+	if (match(
+		'LEFT_BRACE',
+		'LEFT_BRACKET',
+		'NUMBER',
+		'STRING',
+		'NULL',
+		'BOOLEAN')) {
+
 		return grammar.value(shapeContext);
 	}
+	console.log()
 	throw error(peek(), "expected expression");
 }
 
 function binary (nextRule, matchOperators) {
 	return function (shapeContext) {
 		var left = grammar[nextRule](shapeContext), operator, right;
-
 		while(match(...matchOperators)) {
 			operator = previous();
 			right = grammar[nextRule](shapeContext);

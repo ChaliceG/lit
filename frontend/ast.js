@@ -1,14 +1,15 @@
 module.exports = function (...subASTs) {
+	const sortedAst = (subASTs || []).sort(prefix);
 	return {
 		toString: () => subASTs.length === 1
 			? stringify(subASTs[0])
-			: `(${subASTs
-				.sort(prefix)
+			: `(${sortedAst
 				.map(ast => ast.isAst
 					? ast.toString()
 					: ast.value)
 				.join(' ')})`,
-		isAst: true
+		isAst: true,
+		children: sortedAst
 	}
 };
 

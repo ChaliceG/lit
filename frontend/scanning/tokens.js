@@ -38,8 +38,10 @@ const TokenTypes = {
 	WHILE: sequence('while'),
 	WHERE: sequence('where'),
 	SHAPE: sequence('shape'),
+	NULL: sequence('null'),
 	VAL: sequence('val'),
-	IS: sequence('is')
+	IS: sequence('is'),
+	PRINT: sequence('print')
 }
 
 function sequence (string) {

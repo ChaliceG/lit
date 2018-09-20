@@ -1,5 +1,6 @@
 const scanner = require('./frontend/scanning/scanner');
 const parser = require('./frontend/parsing/parser');
+const interpreter = require('./interpreter/interpreter');
 
 
 const reader = require('readline').createInterface({
@@ -22,16 +23,24 @@ if (process.argv.length > 3) {
 if (process.argv.length === 3) {
 	const fs = require('fs');
 	const tokens = scanner(fs.readFileSync(process.argv[2]).toString());
-	//printTokens(tokens);
-	const err = parseTokens(tokens);
-	process.exit(err ? 1 : 0);
+	// printTokens(tokens);
+	const ast = parseTokens(tokens);
+	if (ast === false) {
+		process.exit(1);
+	} else {
+		interpreter(ast);
+		process.exit(0);
+	}
 } else {
 	console.log('Welcome to Lit V -99\n');
 	(function interpret () {
 		reader.question('> ', (input) => {
 			const tokens = scanner(input);
 			//printTokens(tokens);
-			parseTokens(tokens);
+			const ast = parseTokens(tokens);
+			if (ast !== false) {
+				interpreter(ast);
+			}
 			interpret();
 		});
 	})();
@@ -39,16 +48,14 @@ if (process.argv.length === 3) {
 
 function parseTokens (tokens) {
 	try {
-		const ast = parser(tokens);
-		console.log(ast.toString());
-		return false;
+		return parser(tokens);
 	} catch (e) {
 		if (e.token !== undefined) {
 			error(e.token, e.msg);
 		} else {
 			throw e;
 		}
-		return true;
+		return false;
 	}
 }
 

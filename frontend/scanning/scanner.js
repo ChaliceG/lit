@@ -79,7 +79,12 @@ function radixHas (input) {
 		length: input.length
 	};
 
-	
+	if (input === 'true' || input === 'false') return {
+		valid: true,
+		type: 'BOOLEAN',
+		value: input === 'true' ? true : false,
+		length: input.length
+	};
 
 	var focus = tokenRadix;
 	for (var i = 0; i < input.length; i++) {
