@@ -10,7 +10,7 @@ while (index < limit) {{
   }}
 
   while ((index % 3 = 1 || index % 3 = 2) && innerWhiles) {{
-    print "FIZZ"
+    print "FIZ"
     val innerWhiles: false
   }}
   val index: index + 1

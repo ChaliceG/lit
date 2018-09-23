@@ -1,0 +1,7 @@
+//val x: { foo: "bar" nested: { a: "b" } }
+//val y: [1 2 3]
+//print x[["foo"]]
+//print x.foo
+//print x[["nested"]].a
+//print y[[0]]
+print 1 + 2

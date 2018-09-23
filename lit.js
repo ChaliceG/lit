@@ -59,12 +59,13 @@ function parseTokens (tokens) {
 	}
 }
 
-function printTokens (tokens) {
-	const invalidTokens = tokens.filter(token => !token.valid);
-	if (invalidTokens.length > 0) {
-		invalidTokens.forEach(token =>
-			error(token.line, `unexpected token ${token}`));
-		return true;
-	}
-	console.log(JSON.stringify(tokens, null, 2));
-}
+// doesn't work with token feed
+// function printTokens (tokens) {
+// 	const invalidTokens = tokens.filter(token => !token.valid);
+// 	if (invalidTokens.length > 0) {
+// 		invalidTokens.forEach(token =>
+// 			error(token.line, `unexpected token ${token}`));
+// 		return true;
+// 	}
+// 	console.log(JSON.stringify(tokens, null, 2));
+// }

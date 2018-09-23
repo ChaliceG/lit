@@ -1,4 +1,5 @@
 const Tokens = require('./tokens');
+const TokenFeed = require('./tokenFeed');
 const tokenRadix = Tokens.radix;
 const ignoreTokens = Tokens.ignoreTokens;
 const numberRegex = /^[0-9]+(\.[0-9]*)?$/g;
@@ -20,7 +21,7 @@ function scan (input) {
 		line: newLines + 1,
 		valid: true
 	});
-	return tokens;
+	return TokenFeed(tokens);
 }
 
 function countNewLines (string) {

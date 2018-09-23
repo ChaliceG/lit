@@ -1,5 +1,0 @@
-val x: { foo: "bar" nested: { a: "b" } }
-
-print x[["foo"]]
-print x.foo
-print x[["nested"]].a

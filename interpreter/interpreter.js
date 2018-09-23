@@ -1,5 +1,5 @@
 module.exports = function (ast) {
-  // console.log(JSON.stringify(ast, null , 2));
+  //console.log(JSON.stringify(ast, null , 2));
   E(ast);
 }
 
