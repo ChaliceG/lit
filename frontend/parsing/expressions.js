@@ -6,9 +6,14 @@ module.exports = function (T, error, descend) {
       while(T.match(...matchOperators)) {
         operator = T.previous();
         right = descend(nextRule, shapeContext);
-        left = AST(left, operator, right);
+        left = AST({
+          operation: 'BINARY',
+          line: operator.line,
+          operator: operator.type,
+          left: left,
+          right: right
+        });
       }
-
       return left;
     }
   }
@@ -21,9 +26,12 @@ module.exports = function (T, error, descend) {
         T.consume('WHERE', 'expected where');
         var predicate = descend('expression', true);
         return AST({
-          type: 'PREDICATE',
-          value: 'predicate'
-        }, supertype, binding, predicate);
+          operation: 'PREDICATE',
+          line: T.previous().line,
+          supertype: supertype,
+          binding: binding,
+          predicate: predicate
+        });
       }
       return descend('expression', true);
     },
@@ -35,7 +43,12 @@ module.exports = function (T, error, descend) {
     addition: binary('multiplication', ['PLUS', 'MINUS']),
     multiplication: binary('unary', ['STAR', 'SLASH', 'MOD']),
     unary: (shapeContext) => T.match('BANG', 'MINUS')
-      ? AST(T.previous(), descend('unary', shapeContext))
+      ? AST({
+          operation: 'UNARY',
+          line: T.previous().line,
+          operator: T.previous().value,
+          operand: descend('unary', shapeContext)
+        })
       : descend('reference', shapeContext),
   }
 }

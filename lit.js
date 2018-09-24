@@ -28,7 +28,8 @@ if (process.argv.length === 3) {
 	if (ast === false) {
 		process.exit(1);
 	} else {
-		interpreter(ast);
+		console.log(JSON.stringify(ast, null, 2));
+		//interpreter(ast);
 		process.exit(0);
 	}
 } else {

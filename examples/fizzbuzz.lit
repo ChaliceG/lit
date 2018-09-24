@@ -9,7 +9,8 @@ while (index < limit) {{
     val innerWhiles: false
   }}
 
-  while ((index % 3 = 1 || index % 3 = 2) && innerWhiles) {{
+  while ((index % 3 = 1
+    || index % 3 = 2) && innerWhiles) {{
     print "FIZ"
     val innerWhiles: false
   }}

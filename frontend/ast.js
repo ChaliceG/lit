@@ -1,25 +1,26 @@
-module.exports = function (...subASTs) {
-	const sortedAst = (subASTs || []).sort(prefix);
-	return {
-		toString: () => subASTs.length === 1
-			? stringify(subASTs[0])
-			: `(${sortedAst
-				.map(ast => ast.isAst
-					? ast.toString()
-					: ast.value)
-				.join(' ')})`,
-		isAst: true,
-		children: sortedAst
+/*
+shape AST: {
+	operation: string
+	children: [AST]
+	debug: {
+		line: number
+		text: string
 	}
-};
-
-function stringify (terminal) {
-	return terminal.type === 'STRING'
-		? `"${terminal.value}"`
-		: terminal.value;
 }
 
-function prefix (A, B) {
-	if (A.isAst && B.isAst) return 0;
-	return A.isAst ? 1 : -1;
+shape while: AST x where x: {
+	...
+	test: expression
+	statements: [statement]
+}
+
+shape identifier: AST x where x: {
+	...
+	name: string
+}
+*/
+
+// at the moment this is just a passthrough
+module.exports = function (astNode) {
+	return astNode;
 }

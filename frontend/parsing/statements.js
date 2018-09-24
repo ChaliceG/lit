@@ -6,13 +6,18 @@ module.exports = function (T, error, descend) {
       while(!T.atEnd()) {
         statements.push(descend('statement'));
       }
-      return AST({ type:'PROGRAM', value: 'exec' }, ...statements);
+      return AST({
+        operation: 'PROGRAM',
+        line: 0,
+        statements: statements
+      });
     },
     print: () => {
       return AST({
-        type: 'PRINT',
-        value: 'print'
-      }, descend('expression'));
+        operation: 'PRINT',
+        line: T.previous().line,
+        value: descend('expression')
+      });
     },
     statement: () => {
       if (T.match('VAL')) return descend('valueDef');
@@ -27,17 +32,22 @@ module.exports = function (T, error, descend) {
         var test = descend('expression');
         T.consume('RIGHT_PAREN', 'expected )');
         return AST({
-          type: 'WHILE_EXPRESSION',
-          value: 'while'
-        }, test, ...descend('block'));
+          operation: 'WHILE',
+          line: T.previous().line,
+          test: test,
+          statements: descend('block')
+        });
       } else {
         var subject = T.consume('IDENTIFIER', 'expected identifier');
         T.consume('IS', 'expected is');
         var shape = T.consume('IDENTIFIER', 'expected shape');
         return AST({
-          type: 'WHILE_SHAPE',
-          value: 'while'
-        }, subject, shape, ...descend('block'));
+          operation: 'WHILE_SHAPE',
+          line: T.previous().line,
+          subject: subject.value,
+          shape: shape.value,
+          statements: descend('block')
+        });
       }
     },
     block: () => {
@@ -53,11 +63,12 @@ module.exports = function (T, error, descend) {
     valueDef: () => {
       var name = T.consume('IDENTIFIER', 'expected identifier');
       T.consume('COLON', 'expected :');
-      var value = descend('expression');
       return AST({
-        type: 'VALUE_DEFINITION',
-        value: 'val'
-      }, name, value);
+        operation: 'VALUE',
+        line: T.previous().line,
+        identifier: name.value,
+        value: descend('expression')
+      });
     },
     shapeDef: () => {
       var name = T.consume('IDENTIFIER', 'expected identifier'), shapes = [];
@@ -66,9 +77,11 @@ module.exports = function (T, error, descend) {
         shapes.push(descend('predicate'));
       } while (T.match('PIPE'));
       return AST({
-        type: 'SHAPE_DEFINITION',
-        value: 'shape'
-      }, name, ...shapes);
-    },
+        operation: 'SHAPE',
+        line: T.previous().line,
+        identifier: name,
+        shapes: shapes
+      });
+    }
   }
 }

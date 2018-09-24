@@ -2,6 +2,7 @@ const AST = require('../ast.js');
 module.exports = function (T, error, descend) {
   return {
     reference: (shapeContext) => {
+      const startOfRef = T.previous().line;
       var first = descend('primary', shapeContext), referenceList = [first], prop;
       while(T.match('DOUBLE_LEFT_BRACKET', 'PERIOD', 'LEFT_PAREN')) {
         if (T.previous().type === 'LEFT_PAREN') {
@@ -9,65 +10,85 @@ module.exports = function (T, error, descend) {
         }
         if (T.previous().type === 'PERIOD') {
           referenceList.push(AST({
-            type: 'PERIOD',
-            value: '.'
-          }, T.consume('IDENTIFIER', 'expected identifier')));
+            operation: 'PERIOD',
+            line: T.previous().line,
+            identifier: T.consume('IDENTIFIER', 'expected identifier')
+          }));
         }
         if (T.previous().type === 'DOUBLE_LEFT_BRACKET') {
           referenceList.push(AST({
-            type: 'MAP_GET',
-            value: 'get'
-          }, descend('expression', shapeContext)));
+            operation: 'COLLECTION_GET',
+            line: T.previous().line,
+            identifier: descend('expression', shapeContext)
+          }));
           T.consume('DOUBLE_RIGHT_BRACKET', 'expected ]]');
         }
       }
       if (referenceList.length === 1) return first;
       return AST({
-        type: 'REFERENCE',
-        value: 'ref'
-      }, ...referenceList);
+        operation: 'REFERENCE',
+        line: startOfRef,
+        references: referenceList
+      });
     },
     call: (shapeContext) => {
       if (shapeContext) {
         throw error(T.previous(), 'fn calls are not allowed when defining a shape');
       }
+      const line = T.previous().line;
       if (T.peek().type !== 'RIGHT_PAREN') {
         var arg = descend('expression', shapeContext);
         T.consume('RIGHT_PAREN', 'expected )');
         return AST({
-          type: 'CALL',
-          value: 'call'
-        }, first, arg);
+          operation: 'CALL',
+          line: line,
+          function: first,
+          argument: arg
+        });
       }
       T.consume('RIGHT_PAREN', 'expected )');
-      return AST({ type: 'CALL', value: 'call' }, first);
+      return AST({
+        operation: 'CALL',
+        line: line,
+        function: first
+      });
     },
     map: (shapeContext) => {
+      const line = T.previous().line;
       var pairs = [], key, colon, value;
       while(T.match('STRING', 'IDENTIFIER')) {
-        key = AST(T.previous());
+        key = T.previous().value;
         T.consume('COLON', 'expected :');
         value = descend('expression', shapeContext);
-        pairs.push(AST(key, value));
+        pairs.push(AST({
+          operation: 'PAIR',
+          line: T.previous().line,
+          key: key,
+          value: value
+        }));
       }
       return AST({
-        type: 'MAP',
-        value: 'map'
-      }, ...pairs);
+        operation: 'MAP',
+        line: line,
+        pairs: pairs
+      });
     },
     list: (shapeContext) => {
+      const line = T.previous().line;
       var elements = [];
       while (T.peek().type !== 'RIGHT_BRACKET'
         && T.peek().type !== 'END') {
         elements.push(descend('expression', shapeContext));
       }
       return AST({
-        type: 'LIST',
-        value: 'list'
-      }, ...elements);
+        operation: 'LIST',
+        line: line,
+        elements: elements
+      });
     },
     value: (shapeContext) => {
-      switch (T.previous().type) {
+      const type = T.previous().type;
+      switch (type) {
         case 'LEFT_BRACE':
           var inner = descend('map', shapeContext);
           T.consume('RIGHT_BRACE', 'expected }');
@@ -77,7 +98,11 @@ module.exports = function (T, error, descend) {
           T.consume('RIGHT_BRACKET', 'expected ]');
           return inner;
         default:
-          return AST(T.previous());
+          return AST({
+            operation: type,
+            line: T.previous().line,
+            value: T.previous().value
+          });
       }
     },
     primary: (shapeContext) => {
@@ -87,7 +112,11 @@ module.exports = function (T, error, descend) {
         return inner;
       }
       if (T.match('IDENTIFIER')) {
-        return AST(T.previous());
+        return AST({
+          operation: 'IDENTIFIER',
+          line: T.previous().line,
+          identifier: T.previous().value
+        });
       }
       if (T.match(
         'LEFT_BRACE',
@@ -95,10 +124,7 @@ module.exports = function (T, error, descend) {
         'NUMBER',
         'STRING',
         'NULL',
-        'BOOLEAN')) {
-
-        return descend('value', shapeContext);
-      }
+        'BOOLEAN')) return descend('value', shapeContext);
       throw error(T.peek(), "expected expression");
     }
   }
