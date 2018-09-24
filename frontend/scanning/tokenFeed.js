@@ -33,7 +33,7 @@ module.exports = function (tokens) {
   }
 
   function previous () {
-    return tokens[current - 1];
+    return tokens[current - 1] || {line: 0};
   }
 
   function peek () {

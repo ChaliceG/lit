@@ -1,4 +1,3 @@
-const AST = require('../ast.js');
 module.exports = function (tokenFeed) {
 
 	function error (nextToken, errorMsg) {

@@ -1,4 +1,4 @@
-const AST = require('../ast.js');
+const AST = require('../ast.js').build;
 module.exports = function (T, error, descend) {
   function binary (nextRule, matchOperators) {
     return function (shapeContext) {

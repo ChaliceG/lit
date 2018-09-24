@@ -1,7 +1,11 @@
 const scanner = require('./frontend/scanning/scanner');
 const parser = require('./frontend/parsing/parser');
-const interpreter = require('./interpreter/interpreter');
 
+const passes = [
+	require('./frontend/shapes/shapes'),
+	printAst,
+	require('./interpreter/interpreter')
+];
 
 const reader = require('readline').createInterface({
   input: process.stdin,
@@ -23,28 +27,31 @@ if (process.argv.length > 3) {
 if (process.argv.length === 3) {
 	const fs = require('fs');
 	const tokens = scanner(fs.readFileSync(process.argv[2]).toString());
-	// printTokens(tokens);
-	const ast = parseTokens(tokens);
-	if (ast === false) {
-		process.exit(1);
-	} else {
-		console.log(JSON.stringify(ast, null, 2));
-		//interpreter(ast);
-		process.exit(0);
-	}
+	process.exit(execute(tokens) ? 0 : 1);
 } else {
 	console.log('Welcome to Lit V -99\n');
 	(function interpret () {
 		reader.question('> ', (input) => {
 			const tokens = scanner(input);
-			//printTokens(tokens);
-			const ast = parseTokens(tokens);
-			if (ast !== false) {
-				interpreter(ast);
-			}
+			execute(tokens);
 			interpret();
 		});
 	})();
+}
+
+function execute (tokenFeed) {
+	var ast = parseTokens(tokenFeed);
+	for (var i = 0; i < passes.length; i++) {
+		if (ast === false) {
+			return false;
+		}
+		ast = passes[i](ast);
+	}
+}
+
+function printAst (ast) {
+	console.log(JSON.stringify(ast, null ,2));
+	return false;
 }
 
 function parseTokens (tokens) {
@@ -59,14 +66,3 @@ function parseTokens (tokens) {
 		return false;
 	}
 }
-
-// doesn't work with token feed
-// function printTokens (tokens) {
-// 	const invalidTokens = tokens.filter(token => !token.valid);
-// 	if (invalidTokens.length > 0) {
-// 		invalidTokens.forEach(token =>
-// 			error(token.line, `unexpected token ${token}`));
-// 		return true;
-// 	}
-// 	console.log(JSON.stringify(tokens, null, 2));
-// }
